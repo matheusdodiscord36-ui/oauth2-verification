@@ -1,21 +1,38 @@
 import os
 import secrets
+from datetime import datetime, timezone
 from urllib.parse import urlencode
 
 import requests
-from pymongo import MongoClient
 from flask import Flask, jsonify, redirect, render_template, request, session, url_for
+from pymongo import MongoClient
 
-# ---------- Variáveis do Render ----------
+
+# ----------------- Variáveis de ambiente -----------------
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 REDIRECT_URI = os.getenv("REDIRECT_URI")
 MONGO_URI = os.getenv("MONGO_URI")
+
 BOT_NAME = os.getenv("BOT_NAME", "IceX")
 SERVER_NAME = os.getenv("SERVER_NAME", "IceX")
-SCOPE = os.getenv("identify")
+DISCORD_SCOPE = os.getenv("DISCORD_OAUTH_SCOPE", "identify email guilds.join")
 
-# ---------- Checagem básica ----------
+PAISES_BLOQUEADOS = [
+    item.strip().upper()
+    for item in os.getenv("PAISES_BLOQUEADOS", "").split(",")
+    if item.strip()
+]
+
+CIDADES_BLOQUEADAS = [
+    item.strip().lower()
+    for item in os.getenv("CIDADES_BLOQUEADAS", "").split(",")
+    if item.strip()
+]
+
+FLASK_SECRET_KEY = os.getenv("FLASK_SECRET_KEY", secrets.token_hex(32))
+
+
 missing = [
     name for name, value in {
         "CLIENT_ID": CLIENT_ID,
@@ -28,26 +45,29 @@ missing = [
 if missing:
     raise RuntimeError(f"Variáveis de ambiente faltando: {', '.join(missing)}")
 
-# ---------- App Flask ----------
+
+# ----------------- Flask -----------------
 app = Flask(__name__, template_folder="templates", static_folder="static")
-app.secret_key = os.getenv("FLASK_SECRET_KEY", secrets.token_hex(32))
+app.secret_key = FLASK_SECRET_KEY
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
 )
 
-# ---------- MongoDB ----------
+
+# ----------------- MongoDB -----------------
 mongo = MongoClient(MONGO_URI)
 db = mongo["verification_db"]
 users = db["verified_users"]
 
 
+# ----------------- Helpers -----------------
 def discord_auth_url(state: str) -> str:
     params = {
         "client_id": CLIENT_ID,
         "redirect_uri": REDIRECT_URI,
         "response_type": "code",
-        "scope": SCOPE,
+        "scope": DISCORD_SCOPE,
         "state": state,
     }
     return f"https://discord.com/oauth2/authorize?{urlencode(params)}"
@@ -79,9 +99,52 @@ def get_avatar_url(user_doc: dict | None) -> str:
     return f"https://cdn.discordapp.com/embed/avatars/{default_index}.png"
 
 
+def get_client_ip() -> str:
+    forwarded = request.headers.get("X-Forwarded-For", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.remote_addr or "Unknown"
+
+
+def pegar_localizacao(ip: str) -> dict:
+    if not ip or ip == "Unknown":
+        return {"country": "Unknown", "city": "Unknown", "region": "Unknown"}
+
+    try:
+        response = requests.get(f"https://ipapi.co/{ip}/json/", timeout=6)
+        if response.status_code == 200:
+            data = response.json()
+            return {
+                "country": data.get("country_name") or data.get("country") or "Unknown",
+                "city": data.get("city") or "Unknown",
+                "region": data.get("region") or "Unknown",
+            }
+    except Exception:
+        pass
+
+    return {"country": "Unknown", "city": "Unknown", "region": "Unknown"}
+
+
+def is_blocked_country(country: str) -> bool:
+    if not PAISES_BLOQUEADOS:
+        return False
+    return country.strip().upper() in PAISES_BLOQUEADOS
+
+
+def is_blocked_city(city: str) -> bool:
+    if not CIDADES_BLOQUEADAS:
+        return False
+    return city.strip().lower() in CIDADES_BLOQUEADAS
+
+
+# ----------------- Rotas -----------------
 @app.route("/")
 def home():
-    return render_template("index.html", server_name=SERVER_NAME, bot_name=BOT_NAME)
+    return render_template(
+        "index.html",
+        server_name=SERVER_NAME,
+        bot_name=BOT_NAME,
+    )
 
 
 @app.route("/login")
@@ -116,6 +179,19 @@ def callback():
     if not state or state != session.get("oauth_state"):
         return redirect(url_for("error", message="Falha na validação de segurança (state)."))
 
+    user_ip = get_client_ip()
+    geo = pegar_localizacao(user_ip)
+
+    pais = (geo.get("country") or "Unknown").strip()
+    cidade = (geo.get("city") or "Unknown").strip()
+    regiao = (geo.get("region") or "Unknown").strip()
+
+    if is_blocked_country(pais):
+        return redirect(url_for("blocked", reason=f"Acesso bloqueado para usuários do país {pais}."))
+
+    if is_blocked_city(cidade):
+        return redirect(url_for("blocked", reason=f"Acesso bloqueado para usuários da cidade {cidade}."))
+
     token_data = {
         "client_id": CLIENT_ID,
         "client_secret": CLIENT_SECRET,
@@ -124,15 +200,13 @@ def callback():
         "redirect_uri": REDIRECT_URI,
     }
 
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
     token_res = requests.post(
         "https://discord.com/api/oauth2/token",
         data=token_data,
         headers=headers,
-        timeout=15
+        timeout=15,
     )
 
     if token_res.status_code != 200:
@@ -150,7 +224,7 @@ def callback():
     user_res = requests.get(
         "https://discord.com/api/users/@me",
         headers={"Authorization": f"Bearer {access_token}"},
-        timeout=15
+        timeout=15,
     )
 
     if user_res.status_code != 200:
@@ -160,6 +234,7 @@ def callback():
     user_id = str(user_data["id"])
 
     existing = users.find_one({"user_id": user_id})
+    already_verified = bool(existing and existing.get("verified"))
 
     users.update_one(
         {"user_id": user_id},
@@ -167,20 +242,26 @@ def callback():
             "$set": {
                 "user_id": user_id,
                 "verified": True,
+                "verified_at": datetime.now(timezone.utc).isoformat(),
                 "username": user_data.get("username"),
                 "global_name": user_data.get("global_name"),
                 "avatar": user_data.get("avatar"),
                 "discriminator": user_data.get("discriminator"),
+                "ip": user_ip,
+                "country": pais,
+                "city": cidade,
+                "region": regiao,
+                "role_given": existing.get("role_given", False) if existing else False,
                 "data": user_data,
             }
         },
-        upsert=True
+        upsert=True,
     )
 
     session["last_user_id"] = user_id
     session.pop("oauth_state", None)
 
-    if existing and existing.get("verified"):
+    if already_verified:
         return redirect(url_for("already_verified", user_id=user_id))
 
     return redirect(url_for("success", user_id=user_id))
@@ -199,6 +280,9 @@ def success():
         avatar_url=get_avatar_url(user_doc),
         server_name=SERVER_NAME,
         bot_name=BOT_NAME,
+        country=user_doc.get("country") if user_doc else "Unknown",
+        city=user_doc.get("city") if user_doc else "Unknown",
+        region=user_doc.get("region") if user_doc else "Unknown",
     )
 
 
@@ -215,6 +299,9 @@ def already_verified():
         avatar_url=get_avatar_url(user_doc),
         server_name=SERVER_NAME,
         bot_name=BOT_NAME,
+        country=user_doc.get("country") if user_doc else "Unknown",
+        city=user_doc.get("city") if user_doc else "Unknown",
+        region=user_doc.get("region") if user_doc else "Unknown",
     )
 
 
@@ -266,6 +353,12 @@ def api_user():
         "global_name": user.get("global_name") or data.get("global_name"),
         "avatar": get_avatar_url(user),
         "verified": bool(user.get("verified", False)),
+        "verified_at": user.get("verified_at"),
+        "country": user.get("country"),
+        "city": user.get("city"),
+        "region": user.get("region"),
+        "ip": user.get("ip"),
+        "role_given": bool(user.get("role_given", False)),
     })
 
 
@@ -273,7 +366,16 @@ def api_user():
 def health():
     return jsonify({
         "status": "ok",
-        "service": "IceX Verify",
+        "service": f"{BOT_NAME} Verify",
+        "templates": [
+            "index.html",
+            "loading.html",
+            "success.html",
+            "already_verified.html",
+            "blocked.html",
+            "rate_limited.html",
+            "error.html",
+        ],
     })
 
 
