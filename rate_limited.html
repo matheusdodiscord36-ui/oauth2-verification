@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muitas Tentativas - IceX Verify</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/icex-theme.css') }}">
+    <style>
+        .rate-card {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-color: rgba(255, 193, 7, 0.4) !important;
+        }
+        
+        .rate-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: ratePulse 2s ease-in-out infinite;
+            box-shadow: 
+                0 0 30px rgba(255, 193, 7, 0.5),
+                0 0 60px rgba(255, 193, 7, 0.3);
+        }
+        
+        @keyframes ratePulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 
+                    0 0 30px rgba(255, 193, 7, 0.5),
+                    0 0 60px rgba(255, 193, 7, 0.3);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 
+                    0 0 40px rgba(255, 193, 7, 0.7),
+                    0 0 80px rgba(255, 193, 7, 0.5);
+            }
+        }
+        
+        .rate-icon i {
+            font-size: 4rem;
+            color: #0a0a0f;
+        }
+        
+        .rate-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffc107;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
+        }
+        
+        .rate-message {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        
+        .countdown-container {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .countdown-label {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .countdown-item {
+            text-align: center;
+        }
+        
+        .countdown-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: #ffc107;
+            text-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
+            min-width: 80px;
+            display: inline-block;
+        }
+        
+        .countdown-unit {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+        
+        .countdown-separator {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            color: #ffc107;
+            align-self: flex-start;
+            padding-top: 0.5rem;
+        }
+        
+        .info-box {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+        
+        .info-box i {
+            color: var(--ice-primary);
+            margin-right: 0.5rem;
+        }
+        
+        .info-box p {
+            font-family: 'Rajdhani', sans-serif;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.6;
+        }
+        
+        .home-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            padding: 1rem 2.5rem;
+            background: transparent;
+            border: 2px solid var(--ice-primary);
+            border-radius: 12px;
+            color: var(--ice-primary);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .home-btn:hover {
+            background: var(--ice-primary);
+            color: var(--bg-primary);
+            box-shadow: 0 0 30px var(--ice-glow);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="particles-canvas"></canvas>
+    <div class="neon-grid"></div>
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+    
+    <main class="main-container">
+        <div class="verify-card rate-card">
+            <!-- Ícone -->
+            <div class="rate-icon">
+                <i class="fas fa-hourglass-half"></i>
+            </div>
+            
+            <!-- Título -->
+            <h1 class="rate-title">Muitas Tentativas</h1>
+            
+            <!-- Mensagem -->
+            <p class="rate-message">
+                Você excedeu o limite de tentativas de verificação.<br>
+                Por favor, aguarde antes de tentar novamente.
+            </p>
+            
+            <!-- Countdown -->
+            <div class="countdown-container">
+                <p class="countdown-label">Tempo restante:</p>
+                <div class="countdown">
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="minutes">{{ '%02d' % minutes }}</span>
+                        <span class="countdown-unit">minutos</span>
+                    </div>
+                    <span class="countdown-separator">:</span>
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="seconds">{{ '%02d' % seconds }}</span>
+                        <span class="countdown-unit">segundos</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Info -->
+            <div class="info-box">
+                <p>
+                    <i class="fas fa-info-circle"></i>
+                    Esta medida protege o sistema contra spam e abuso. 
+                    Limite: 3 tentativas por minuto.
+                </p>
+            </div>
+            
+            <!-- Botão voltar -->
+            <a href="/" class="home-btn">
+                <i class="fas fa-home"></i>
+                <span>Voltar ao início</span>
+            </a>
+        </div>
+        
+        <footer class="footer">
+            <p>Protegido por <span class="brand">IceX</span> Security</p>
+        </footer>
+    </main>
+    
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script>
+        // Countdown timer
+        let minutes = {{ minutes }};
+        let seconds = {{ seconds }};
+        
+        function updateCountdown() {
+            if (seconds > 0) {
+                seconds--;
+            } else if (minutes > 0) {
+                minutes--;
+                seconds = 59;
+            }
+            
+            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+            
+            if (minutes === 0 && seconds === 0) {
+                location.reload();
+            }
+        }
+        
+        setInterval(updateCountdown, 1000);
+    </script>
+</body>
+</html>

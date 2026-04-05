@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificação Concluída - IceX Verify</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/icex-theme.css') }}">
+    <style>
+        .success-card {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+        
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, #00d4aa 0%, #00ff88 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: successPulse 2s ease-in-out infinite;
+            box-shadow: 
+                0 0 30px rgba(0, 212, 170, 0.5),
+                0 0 60px rgba(0, 212, 170, 0.3);
+        }
+        
+        @keyframes successPulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 
+                    0 0 30px rgba(0, 212, 170, 0.5),
+                    0 0 60px rgba(0, 212, 170, 0.3);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 
+                    0 0 40px rgba(0, 212, 170, 0.7),
+                    0 0 80px rgba(0, 212, 170, 0.5);
+            }
+        }
+        
+        .success-icon i {
+            font-size: 3rem;
+            color: #0a0a0f;
+        }
+        
+        .user-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            border: 3px solid var(--ice-primary);
+            box-shadow: 
+                0 0 20px var(--ice-glow),
+                0 0 40px var(--ice-glow);
+            object-fit: cover;
+            animation: avatarGlow 3s ease-in-out infinite;
+        }
+        
+        @keyframes avatarGlow {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 20px var(--ice-glow),
+                    0 0 40px var(--ice-glow);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 30px var(--ice-glow),
+                    0 0 60px var(--ice-glow),
+                    0 0 80px var(--ice-glow);
+            }
+        }
+        
+        .username {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px var(--ice-glow);
+        }
+        
+        .success-message {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.3rem;
+            color: #00d4aa;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .security-badges {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            border-radius: 50px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .badge-safe {
+            background: rgba(0, 212, 170, 0.15);
+            border: 1px solid rgba(0, 212, 170, 0.4);
+            color: #00d4aa;
+        }
+        
+        .badge-warning {
+            background: rgba(255, 193, 7, 0.15);
+            border: 1px solid rgba(255, 193, 7, 0.4);
+            color: #ffc107;
+        }
+        
+        .badge-info {
+            background: rgba(0, 212, 255, 0.15);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            color: var(--ice-primary);
+        }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, var(--neon-purple) 0%, var(--neon-blue) 100%);
+            border: none;
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 0 20px rgba(138, 43, 226, 0.4),
+                0 0 40px rgba(0, 212, 255, 0.2);
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 0 30px rgba(138, 43, 226, 0.6),
+                0 0 60px rgba(0, 212, 255, 0.4);
+        }
+        
+        .back-btn i {
+            font-size: 1.1rem;
+        }
+        
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            animation: confettiFall 3s ease-out forwards;
+        }
+        
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="particles-canvas"></canvas>
+    <div class="neon-grid"></div>
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+    
+    <main class="main-container">
+        <div class="verify-card success-card">
+            <!-- Ícone de sucesso -->
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            
+            <!-- Avatar do usuário -->
+            <img src="{{ avatar_url }}" alt="Avatar" class="user-avatar" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+            
+            <!-- Nome do usuário -->
+            <h1 class="username">{{ username }}</h1>
+            
+            <!-- Mensagem de sucesso -->
+            <p class="success-message">
+                <i class="fas fa-shield-check"></i>
+                Verificação concluída com sucesso!
+            </p>
+            
+            <!-- Badges de segurança -->
+            <div class="security-badges">
+                {% if is_suspect %}
+                <div class="badge badge-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Conta recente detectada</span>
+                </div>
+                {% else %}
+                <div class="badge badge-safe">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Conta segura</span>
+                </div>
+                {% endif %}
+                
+                <div class="badge badge-info">
+                    <i class="fas fa-calendar"></i>
+                    <span>{{ account_age }} dias de conta</span>
+                </div>
+                
+                {% if ip_reused %}
+                <div class="badge badge-warning">
+                    <i class="fas fa-network-wired"></i>
+                    <span>IP compartilhado</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Botão voltar -->
+            <a href="{{ server_url }}" class="back-btn" target="_blank">
+                <i class="fab fa-discord"></i>
+                <span>Voltar para o servidor</span>
+            </a>
+        </div>
+        
+        <footer class="footer">
+            <p>Verificação realizada com <span class="brand">IceX</span> Security</p>
+        </footer>
+    </main>
+    
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script>
+        // Efeito de confetti
+        function createConfetti() {
+            const colors = ['#00d4ff', '#8a2be2', '#00d4aa', '#ffffff', '#00ff88'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 2 + 's';
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 50);
+            }
+        }
+        
+        // Dispara confetti ao carregar
+        window.addEventListener('load', createConfetti);
+    </script>
+</body>
+</html>
