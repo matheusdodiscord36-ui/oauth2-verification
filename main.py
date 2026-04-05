@@ -13,7 +13,7 @@ REDIRECT_URI = os.getenv("REDIRECT_URI")
 MONGO_URI = os.getenv("MONGO_URI")
 BOT_NAME = os.getenv("BOT_NAME", "IceX")
 SERVER_NAME = os.getenv("SERVER_NAME", "IceX")
-SCOPE = os.getenv("DISCORD_OAUTH_SCOPE", "identify")
+SCOPE = os.getenv("identify")
 
 # ---------- Checagem básica ----------
 missing = [
