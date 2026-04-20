@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IceX Verify - Verificação Discord</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/icex-theme.css') }}">
+</head>
+<body>
+    <!-- Canvas de partículas de fundo -->
+    <canvas id="particles-canvas"></canvas>
+    
+    <!-- Grid neon de fundo -->
+    <div class="neon-grid"></div>
+    
+    <!-- Glow orbs -->
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+    
+    <!-- Container principal -->
+    <main class="main-container">
+        <div class="verify-card">
+            <!-- Logo/Ícone -->
+            <div class="logo-container">
+                <div class="ice-crystal">
+                    <i class="fas fa-snowflake"></i>
+                </div>
+                <div class="logo-glow"></div>
+            </div>
+            
+            <!-- Título -->
+            <h1 class="title">
+                <span class="title-ice">Ice</span><span class="title-x">X</span>
+                <span class="title-verify">Verify</span>
+            </h1>
+            
+            <!-- Subtítulo -->
+            <p class="subtitle">
+                Sistema de verificação seguro e inteligente
+            </p>
+            
+            <!-- Descrição -->
+            <div class="description">
+                <p>
+                    <i class="fas fa-shield-alt"></i>
+                    Proteção anti-fake e anti-alt
+                </p>
+                <p>
+                    <i class="fas fa-bolt"></i>
+                    Verificação instantânea
+                </p>
+                <p>
+                    <i class="fas fa-lock"></i>
+                    Seus dados estão protegidos
+                </p>
+            </div>
+            
+            <!-- Botão de verificação -->
+            <a href="/verify" class="verify-btn">
+                <span class="btn-icon">
+                    <i class="fab fa-discord"></i>
+                </span>
+                <span class="btn-text">Entrar com Discord</span>
+                <span class="btn-shine"></span>
+            </a>
+            
+            <!-- Info de segurança -->
+            <div class="security-info">
+                <i class="fas fa-check-circle"></i>
+                <span>Verificação OAuth2 segura</span>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Powered by <span class="brand">IceX</span> Enterprise</p>
+        </footer>
+    </main>
+    
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
